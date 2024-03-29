@@ -23,18 +23,24 @@ public class Client {
 
         initializer.setInstancesForObject(LwM2mId.SECURITY, Security.noSec("coap://localhost:5683", 2137));
         initializer.setInstancesForObject(LwM2mId.SERVER, new Server(2137, 5 * 60, BindingMode.U, false));
-        initializer.setInstancesForObject(LwM2mId.DEVICE, new Device("Tester", "t2000", finalArgs[1], BindingMode.U.name()));
+        initializer.setInstancesForObject(LwM2mId.DEVICE, new Device("MW", "t2000", finalArgs[1], BindingMode.U.name()));
 
         builder.setObjects(initializer.createAll());
 
         LeshanClient client = builder.build();
+        //Client client1 = this;
+        //LOG.  .info("Leshan client started.");
+        System.out.println("Client " +finalArgs[0] + " ready to start ...");
         client.start();
-
+        System.out.println("Client " +finalArgs[0] + " started successfully and is running ...");
 //Debugging stuff
         while(true){
             Scanner sc = new Scanner(System.in);
-            if (Objects.equals(sc.next(), "u"))
+            if (Objects.equals(sc.next(), "u")) {
+                System.out.println("Before trigger");
                 client.triggerRegistrationUpdate();
+                System.out.println("After trigger");
+            }
         }
     }
 }
