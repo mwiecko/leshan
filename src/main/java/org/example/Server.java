@@ -17,6 +17,8 @@ import org.eclipse.leshan.server.californium.LeshanServerBuilder;
 import org.eclipse.leshan.server.registration.Registration;
 import org.eclipse.leshan.server.registration.RegistrationListener;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -40,16 +42,19 @@ public class Server {
             public void registered(Registration registration, Registration previousReg,
                                    Collection<Observation> previousObsersations) {
                 regList.add(registration);
-                System.out.println("new device: " + registration.getEndpoint());
+                String lt = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                System.out.println(lt+" New Device: \"" + registration.getEndpoint() + "\"");
             }
 
             public void updated(RegistrationUpdate update, Registration updatedReg, Registration previousReg) {
-                System.out.println("device is still here: " + updatedReg.getEndpoint());
+                String lt = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                System.out.println(lt+" Device \""+ updatedReg.getEndpoint()+ "\" is still here");
             }
 
             public void unregistered(Registration registration, Collection<Observation> observations, boolean expired, Registration newReg) {
                 regList.remove(registration);
-                System.out.println("device left: " + registration.getEndpoint());
+                String lt = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                System.out.println(lt+" Device \""+registration.getEndpoint()+"\" left");
             }
         });
 

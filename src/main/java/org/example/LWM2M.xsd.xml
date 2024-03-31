@@ -1,0 +1,53 @@
+<!DOCTYPE LWM2M [
+        <!ELEMENT LWM2M (Object)*>
+        <!ELEMENT Object (Name|Description1|ObjectID|ObjectURN|LWM2MVersion|ObjectVersion|MultipleInstances|Mandatory|Resources|Description2)*>
+        <!ATTLIST Object
+                ObjectType CDATA #REQUIRED>
+        <!ELEMENT Name (#PCDATA)>
+        <!ELEMENT Description1 (#PCDATA)>
+        <!ELEMENT ObjectID (#PCDATA)>
+        <!ELEMENT ObjectURN (#PCDATA)>
+        <!ELEMENT LWM2MVersion (#PCDATA)>
+        <!ELEMENT ObjectVersion (#PCDATA)>
+        <!ELEMENT MultipleInstances (#PCDATA)>
+        <!ELEMENT Mandatory (#PCDATA)>
+        <!ELEMENT Resources (Item)*>
+        <!ELEMENT Item (Name|Operations|MultipleInstances|Mandatory|Type|RangeEnumeration|Units|Description)*>
+        <!ATTLIST Item
+                ID CDATA #REQUIRED>
+        <!ELEMENT Operations (#PCDATA)>
+        <!ELEMENT Type (#PCDATA)>
+        <!ELEMENT RangeEnumeration (#PCDATA)>
+        <!ELEMENT Units (#PCDATA)>
+        <!ELEMENT Description (#PCDATA)>
+        <!ELEMENT Description2 (#PCDATA)>
+        ]>
+<LWM2M>
+  <!--1 or more repetitions:-->
+  <Object ObjectType="string">
+    <Name>string</Name>
+    <Description1>string</Description1>
+    <ObjectID>5</ObjectID>
+    <ObjectURN>string</ObjectURN>
+    <!--Optional:-->
+    <LWM2MVersion>string</LWM2MVersion>
+    <!--Optional:-->
+    <ObjectVersion>string</ObjectVersion>
+    <MultipleInstances>Multiple</MultipleInstances>
+    <Mandatory>Mandatory</Mandatory>
+    <Resources>
+      <!--1 or more repetitions:-->
+      <Item ID="5">
+        <Name>string</Name>
+        <Operations>E</Operations>
+        <MultipleInstances>Single</MultipleInstances>
+        <Mandatory>Optional</Mandatory>
+        <Type>Integer</Type>
+        <RangeEnumeration>string</RangeEnumeration>
+        <Units>string</Units>
+        <Description>string</Description>
+      </Item>
+    </Resources>
+    <Description2>string</Description2>
+  </Object>
+</LWM2M>

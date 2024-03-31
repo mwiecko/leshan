@@ -37,13 +37,21 @@ public class Client {
         builder.setObjects(initializer.createAll());
 
         LeshanClient client = builder.build();
+        //Client client1 = this;
+        //LOG.  .info("Leshan client started.");
+//        System.LoggerFinder lf= System.LoggerFinder.getLoggerFinder();// .Logger.Level(SEVERE); // Level(20);//  .info("Starting Leshan client ...");
+//        System.Logger logger =lf.getLogger();
+        System.out.println("Client " +finalArgs[0] + " ready to start ...");
         client.start();
-
+        System.out.println("Client " +finalArgs[0] + " started successfully and is running ...");
 //Debugging stuff
         while(true){
             Scanner sc = new Scanner(System.in);
-            if (Objects.equals(sc.next(), "u"))
+            if (Objects.equals(sc.next(), "u")) {
+                System.out.println("Before trigger");
                 client.triggerRegistrationUpdate();
+                System.out.println("After trigger");
+            }
         }
     }
 }
