@@ -24,6 +24,8 @@ import java.util.*;
 
 public class Server {
     public static void main(String[] args) {
+
+        System.out.println("test 2");
         LeshanServerBuilder builder = new LeshanServerBuilder();
 
         String[] modelPaths = new String[]{"42800.xml"};
