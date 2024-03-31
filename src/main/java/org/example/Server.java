@@ -1,9 +1,15 @@
 package org.example;
 
 
+import org.eclipse.leshan.core.model.ObjectLoader;
+import org.eclipse.leshan.core.model.ObjectModel;
 import org.eclipse.leshan.core.node.LwM2mResource;
 import org.eclipse.leshan.core.request.*;
+import org.eclipse.leshan.core.response.ExecuteResponse;
 import org.eclipse.leshan.core.response.ReadResponse;
+import org.eclipse.leshan.core.response.WriteResponse;
+import org.eclipse.leshan.server.model.LwM2mModelProvider;
+import org.eclipse.leshan.server.model.StaticModelProvider;
 import org.eclipse.leshan.server.registration.RegistrationUpdate;
 import org.eclipse.leshan.core.observation.Observation;
 import org.eclipse.leshan.server.californium.LeshanServer;
@@ -17,8 +23,16 @@ import java.util.*;
 public class Server {
     public static void main(String[] args) {
         LeshanServerBuilder builder = new LeshanServerBuilder();
+
+        String[] modelPaths = new String[]{"42800.xml"};
+        List<ObjectModel> models = ObjectLoader.loadAllDefault();
+        models.addAll(ObjectLoader.loadDdfResources("/models/", modelPaths));
+        LwM2mModelProvider modelProvider = new StaticModelProvider(models);
+        builder.setObjectModelProvider(modelProvider);
+
         LeshanServer server = builder.build();
         server.start();
+
 
         ArrayList<Registration> regList = new ArrayList<>();
 
@@ -40,14 +54,93 @@ public class Server {
         });
 
 //Debugging stuff
-        while(true) {
+        int clientId;
+        char action;
+        int objectId;
+        int objectInstanceId;
+        int resource;
+        String value = "";
+
+        while (true) {
             Scanner sc = new Scanner(System.in);
             String input = sc.nextLine();
             String[] request = input.split("/");
-            Object formattedRequest = null;
 
-            if (Objects.equals(request[0], "?")) {
-                System.out.println("""
+            if (input.isEmpty()) continue;
+            if (request[0].charAt(0) == '?'){
+                showFullHint();
+                continue;
+            } else if (request.length < 5) {
+                showHint();
+                continue;
+            } else {
+                try {
+                    clientId = Integer.parseInt(request[0]);
+                    action = request[1].charAt(0);
+                    objectId = Integer.parseInt(request[2]);
+                    objectInstanceId = Integer.parseInt(request[3]);
+                    resource = Integer.parseInt(request[4]);
+                }catch (Exception ignored){
+                    showHint();
+                    continue;
+                }
+            }
+            if (request.length == 6)
+                value = request[5];
+
+            if (action == 'w' && request.length != 6) {
+                System.out.println("write action requires value argument");
+                showHint();
+                continue;
+            }
+
+            try {
+                switch (action) {
+                    case 'r' -> {
+                        ReadResponse response = server.send(regList.get(clientId), new ReadRequest(
+                                objectId,
+                                objectInstanceId,
+                                resource
+                        ));
+                        if (response.isSuccess())
+                            System.out.println("response: " + ((LwM2mResource) response.getContent()).getValue());
+                        else
+                            System.out.println("Failed to read:" + response.getCode() + " " + response.getErrorMessage());
+                    }
+                    case 'w' -> {
+                        WriteResponse response = server.send(regList.get(clientId), new WriteRequest(
+                                objectId,
+                                objectInstanceId,
+                                resource,
+                                value
+                        ));
+                        if (response.isSuccess())
+                            System.out.println("value changed");
+                        else
+                            System.out.println("Failed to write:" + response.getCode() + " " + response.getErrorMessage());
+                    }
+                    case 'e' -> {
+                        ExecuteResponse response = server.send(regList.get(clientId), new ExecuteRequest(
+                                objectId,
+                                objectInstanceId,
+                                resource
+                        ));
+                        if (response.isSuccess())
+                            System.out.println("Execution successful");
+                        else
+                            System.out.println("Failed to execute:" + response.getCode() + " " + response.getErrorMessage());
+                    }
+                    default -> showHint();
+                }
+            }catch (Exception ignored) {}
+        }
+    }
+    private static void showHint(){
+        System.out.println("format: id/r/objectId/objectInstanceId/resource\ntype '?' for more info");
+    }
+
+    private static void showFullHint(){
+        System.out.println("""
                         ---------------------
                         format: clientPseudoId/action/objectId/objectInstanceId/resource/(value)
                         available actions:
@@ -56,52 +149,6 @@ public class Server {
                         e -> execute
                         ---------------------
                         """
-                );
-            } else {
-                switch (request[1]) {
-                    case "r" -> {
-                        if (request.length == 5)
-                            formattedRequest = (Object) (new ReadRequest(
-                                    Integer.parseInt(request[2]),
-                                    Integer.parseInt(request[3]),
-                                    Integer.parseInt(request[4])
-                            ));
-                        else
-                            System.out.println("format: id/r/objectId/objectInstanceId/resource\ntype '?' for more info");
-                    }
-                    case "w" -> {
-                        if (request.length == 6)
-                            formattedRequest = (Object) (new WriteRequest(
-                                    Integer.parseInt(request[2]),
-                                    Integer.parseInt(request[3]),
-                                    Integer.parseInt(request[4]),
-                                    Long.parseLong(request[5])
-                            ));
-                        else
-                            System.out.println("format: id/w/objectId/objectInstanceId/resource/value\ntype '?' for more info");
-                    }
-                    case "e" -> {
-                        if (request.length == 5)
-                            formattedRequest = (Object) (new ExecuteRequest(
-                                    Integer.parseInt(request[2]),
-                                    Integer.parseInt(request[3]),
-                                    Integer.parseInt(request[4])
-                            ));
-                        else
-                            System.out.println("format: id/e/objectId/objectInstanceId/resource\ntype '?' for more info");
-                    }
-                }
-                try {
-                    ReadResponse response = server.send(
-                            regList.get(Integer.parseInt(request[0])),
-                            (DownlinkRequest<? extends ReadResponse>) formattedRequest
-                    );
-                    if (response.isSuccess())
-                        System.out.println("response: " + ((LwM2mResource) response.getContent()).getValue());
-                    else
-                        System.out.println("Failed to read:" + response.getCode() + " " + response.getErrorMessage());
-                } catch (Exception ignored) {}
-            }
-        }
+        );
     }
 }
