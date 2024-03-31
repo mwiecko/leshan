@@ -29,21 +29,19 @@ public class Client {
         models.addAll(ObjectLoader.loadDdfResources("/models/", modelPaths));
         ObjectsInitializer initializer = new ObjectsInitializer(new StaticModel(models));
 
-        initializer.setInstancesForObject(LwM2mId.SECURITY, Security.noSec("coap://192.168.0.147", 2137));
+        initializer.setInstancesForObject(LwM2mId.SECURITY, Security.noSec("coap://localhost:5683", 2137));
         initializer.setInstancesForObject(LwM2mId.SERVER, new Server(2137, 10 * 60, BindingMode.U, false));
         initializer.setInstancesForObject(LwM2mId.DEVICE, new Device("Tester", "t2000", finalArgs[1], BindingMode.U.name()));
         initializer.setInstancesForObject(42800, new TestObject(666));
 
         builder.setObjects(initializer.createAll());
-
         LeshanClient client = builder.build();
-        //Client client1 = this;
-        //LOG.  .info("Leshan client started.");
-//        System.LoggerFinder lf= System.LoggerFinder.getLoggerFinder();// .Logger.Level(SEVERE); // Level(20);//  .info("Starting Leshan client ...");
-//        System.Logger logger =lf.getLogger();
+
         System.out.println("Client " +finalArgs[0] + " ready to start ...");
         client.start();
         System.out.println("Client " +finalArgs[0] + " started successfully and is running ...");
+
+
 //Debugging stuff
         while(true){
             Scanner sc = new Scanner(System.in);
