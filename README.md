@@ -1,4 +1,4 @@
-1. Uruchom klienta pierwszy raz, IDE utworzy wtedy konfiguracje (możesz już wyłączyć).
+1. Uruchom klienta pierwszy raz, IDE utworzy wtedy konfiguracje (możesz już wyłączyć). 
   
    ![image](https://github.com/mwiecko/leshan/assets/108219388/aab1628f-fe3b-41ac-b401-9e07f9e07054)
 2. Skopiuj konfigurację.
