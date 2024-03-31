@@ -29,7 +29,7 @@ public class Server {
                                    Collection<Observation> previousObsersations) {
                 regList.add(registration);
                 String lt = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-                System.out.println(lt+" New device: \"" + registration.getEndpoint() + "\"");
+                System.out.println(lt+" New Device: \"" + registration.getEndpoint() + "\"");
             }
 
             public void updated(RegistrationUpdate update, Registration updatedReg, Registration previousReg) {
