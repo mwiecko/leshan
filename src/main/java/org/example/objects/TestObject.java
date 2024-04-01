@@ -1,4 +1,4 @@
-package org.example.stuff;
+package org.example.objects;
 
 import org.eclipse.leshan.client.resource.BaseInstanceEnabler;
 import org.eclipse.leshan.client.servers.ServerIdentity;

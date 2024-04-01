@@ -11,14 +11,17 @@ import org.eclipse.leshan.core.model.ObjectLoader;
 import org.eclipse.leshan.core.model.ObjectModel;
 import org.eclipse.leshan.core.model.StaticModel;
 import org.eclipse.leshan.core.request.BindingMode;
-import org.example.stuff.Temperature;
-import org.example.stuff.TestObject;
+import org.example.objects.Temperature;
+import org.example.objects.TestObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
 public class Client {
+    private static final Logger LOG = LoggerFactory.getLogger("---");
     public static void main(String[] args) {
         String[] finalArgs = {"clientDef-test", "00"};
         System.arraycopy(args, 0, finalArgs, 0, args.length);
@@ -39,18 +42,17 @@ public class Client {
         builder.setObjects(initializer.createAll());
         LeshanClient client = builder.build();
 
-        System.out.println("Client " +finalArgs[0] + " ready to start ...");
+        LOG.info("Client " +finalArgs[0] + " ready to start ...");
         client.start();
-        System.out.println("Client " +finalArgs[0] + " started successfully and is running ...");
-
+        LOG.info("Client " +finalArgs[0] + " started successfully and is running ...");
 
 //Debugging stuff
         while(true){
             Scanner sc = new Scanner(System.in);
             if (Objects.equals(sc.next(), "u")) {
-                System.out.println("Before trigger");
+                LOG.info("Before trigger");
                 client.triggerRegistrationUpdate();
-                System.out.println("After trigger");
+                LOG.info("After trigger");
             }
         }
     }
