@@ -11,6 +11,7 @@ import org.eclipse.leshan.core.model.ObjectLoader;
 import org.eclipse.leshan.core.model.ObjectModel;
 import org.eclipse.leshan.core.model.StaticModel;
 import org.eclipse.leshan.core.request.BindingMode;
+import org.example.stuff.Temperature;
 import org.example.stuff.TestObject;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class Client {
 
         LeshanClientBuilder builder = new LeshanClientBuilder(finalArgs[0]);
 
-        String[] modelPaths = new String[] { "42800.xml"};
+        String[] modelPaths = new String[] { "3303.xml", "42800.xml"};
         List<ObjectModel> models = ObjectLoader.loadAllDefault();
         models.addAll(ObjectLoader.loadDdfResources("/models/", modelPaths));
         ObjectsInitializer initializer = new ObjectsInitializer(new StaticModel(models));
@@ -32,6 +33,7 @@ public class Client {
         initializer.setInstancesForObject(LwM2mId.SECURITY, Security.noSec("coap://localhost:5683", 2137));
         initializer.setInstancesForObject(LwM2mId.SERVER, new Server(2137, 10 * 60, BindingMode.U, false));
         initializer.setInstancesForObject(LwM2mId.DEVICE, new Device("Tester", "t2000", finalArgs[1], BindingMode.U.name()));
+        initializer.setInstancesForObject(3303, new Temperature());
         initializer.setInstancesForObject(42800, new TestObject(666));
 
         builder.setObjects(initializer.createAll());
