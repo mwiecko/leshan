@@ -9,8 +9,6 @@ import org.example.nLeshan.TempSensorSim;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class Temperature extends BaseInstanceEnabler {
     private static final List<Integer> supportedResources = Arrays.asList(5700, 5601, 5602, 5603, 5604, 5701, 5605);
@@ -26,10 +24,9 @@ public class Temperature extends BaseInstanceEnabler {
         maxRangeValue = 100f;
         sensorUnits = "°C";
         new TempSensorSim(this);
-        //init();
     }
 
-    public boolean updateSensorValue(Float value){
+    public void updateSensorValue(Float value){
         if (value >= minRangeValue && value <= maxRangeValue){
             sensorValue = value;
             if (maxMeasuredValue == null)
@@ -41,9 +38,10 @@ public class Temperature extends BaseInstanceEnabler {
                 maxMeasuredValue = value;
             else if (value < minMeasuredValue)
                 minMeasuredValue = value;
-            return true;
-        } else
-            return false;
+        } else{
+            sensorValue = Float.POSITIVE_INFINITY;
+        }
+
     }
 
     @Override
@@ -95,19 +93,4 @@ public class Temperature extends BaseInstanceEnabler {
     public Float getMaxRangeValue() {
         return maxRangeValue;
     }
-
-    //    private void init() {
-//        new Timer().schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                double valToUpdate = Math.random() * (
-//                        maxRangeValue - minRangeValue + 1
-//                ) + minRangeValue;
-//                if (!updateSensorValue((float) valToUpdate))
-//                    System.out.println("somting brokn");
-//                System.out.println(sensorValue);
-//            }
-//        }, 0, 3000);
-//        System.out.println("sensor simulator running");
-//    }
 }

@@ -29,7 +29,7 @@ public class Server {
     public static void main(String[] args) {
         LeshanServerBuilder builder = new LeshanServerBuilder();
 
-        String[] modelPaths = new String[]{"3303.xml", "42800.xml"};
+        String[] modelPaths = new String[]{"3303.xml", "3306.xml", "42800.xml"};
         List<ObjectModel> models = ObjectLoader.loadAllDefault();
         models.addAll(ObjectLoader.loadDdfResources("/models/", modelPaths));
         LwM2mModelProvider modelProvider = new StaticModelProvider(models);

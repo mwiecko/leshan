@@ -6,7 +6,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class TempSensorSim {
-    private Temperature tempObject;
+    private final Temperature tempObject;
     public TempSensorSim(Temperature tempObject){
         this.tempObject = tempObject;
         init();
@@ -19,8 +19,7 @@ public class TempSensorSim {
                 double valToUpdate = Math.random() * (
                         tempObject.getMaxRangeValue() - tempObject.getMinRangeValue() + 1
                 ) + tempObject.getMinRangeValue();
-                if (!tempObject.updateSensorValue((float) valToUpdate))
-                    System.out.println("somting brokn");
+                tempObject.updateSensorValue((float) valToUpdate);
             }
         }, 0, 5000);
         System.out.println("sensor simulator running");
