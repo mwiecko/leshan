@@ -16,6 +16,8 @@ import org.eclipse.leshan.server.californium.LeshanServer;
 import org.eclipse.leshan.server.californium.LeshanServerBuilder;
 import org.eclipse.leshan.server.registration.Registration;
 import org.eclipse.leshan.server.registration.RegistrationListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -23,12 +25,13 @@ import java.util.*;
 
 
 public class Server {
+    public static final Logger LOG = LoggerFactory.getLogger("---");
     public static void main(String[] args) {
 
         System.out.println("test 2");
         LeshanServerBuilder builder = new LeshanServerBuilder();
 
-        String[] modelPaths = new String[]{"42800.xml"};
+        String[] modelPaths = new String[]{"3303.xml", "3306.xml", "42800.xml"};
         List<ObjectModel> models = ObjectLoader.loadAllDefault();
         models.addAll(ObjectLoader.loadDdfResources("/models/", modelPaths));
         LwM2mModelProvider modelProvider = new StaticModelProvider(models);
@@ -45,18 +48,18 @@ public class Server {
                                    Collection<Observation> previousObsersations) {
                 regList.add(registration);
                 String lt = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-                System.out.println(lt+" New Device: \"" + registration.getEndpoint() + "\"");
+                LOG.info(lt+" New Device: \"" + registration.getEndpoint() + "\"");
             }
 
             public void updated(RegistrationUpdate update, Registration updatedReg, Registration previousReg) {
                 String lt = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-                System.out.println(lt+" Device \""+ updatedReg.getEndpoint()+ "\" is still here");
+                LOG.info(lt+" Device \""+ updatedReg.getEndpoint()+ "\" is still here");
             }
 
             public void unregistered(Registration registration, Collection<Observation> observations, boolean expired, Registration newReg) {
                 regList.remove(registration);
                 String lt = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-                System.out.println(lt+" Device \""+registration.getEndpoint()+"\" left");
+                LOG.info(lt+" Device \""+registration.getEndpoint()+"\" left");
             }
         });
 
@@ -96,7 +99,7 @@ public class Server {
                 value = request[5];
 
             if (action == 'w' && request.length != 6) {
-                System.out.println("write action requires value argument");
+                System.out.println("write action requires value");
                 showHint();
                 continue;
             }
@@ -110,9 +113,9 @@ public class Server {
                                 resource
                         ));
                         if (response.isSuccess())
-                            System.out.println("response: " + ((LwM2mResource) response.getContent()).getValue());
+                            LOG.info("response: " + ((LwM2mResource) response.getContent()).getValue());
                         else
-                            System.out.println("Failed to read:" + response.getCode() + " " + response.getErrorMessage());
+                            LOG.error("Failed to read:" + response.getCode() + " " + response.getErrorMessage());
                     }
                     case 'w' -> {
                         WriteResponse response = server.send(regList.get(clientId), new WriteRequest(
@@ -122,9 +125,9 @@ public class Server {
                                 value
                         ));
                         if (response.isSuccess())
-                            System.out.println("value changed");
+                            LOG.info("value changed");
                         else
-                            System.out.println("Failed to write:" + response.getCode() + " " + response.getErrorMessage());
+                           LOG.error("Failed to write:" + response.getCode() + " " + response.getErrorMessage());
                     }
                     case 'e' -> {
                         ExecuteResponse response = server.send(regList.get(clientId), new ExecuteRequest(
@@ -133,9 +136,9 @@ public class Server {
                                 resource
                         ));
                         if (response.isSuccess())
-                            System.out.println("Execution successful");
+                            LOG.info("Execution successful");
                         else
-                            System.out.println("Failed to execute:" + response.getCode() + " " + response.getErrorMessage());
+                            LOG.error("Failed to execute:" + response.getCode() + " " + response.getErrorMessage());
                     }
                     default -> showHint();
                 }
