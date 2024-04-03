@@ -4,18 +4,20 @@ package org.example;
 import org.eclipse.leshan.core.model.ObjectLoader;
 import org.eclipse.leshan.core.model.ObjectModel;
 import org.eclipse.leshan.core.node.LwM2mResource;
-import org.eclipse.leshan.core.request.*;
+import org.eclipse.leshan.core.observation.Observation;
+import org.eclipse.leshan.core.request.ExecuteRequest;
+import org.eclipse.leshan.core.request.ReadRequest;
+import org.eclipse.leshan.core.request.WriteRequest;
 import org.eclipse.leshan.core.response.ExecuteResponse;
 import org.eclipse.leshan.core.response.ReadResponse;
 import org.eclipse.leshan.core.response.WriteResponse;
-import org.eclipse.leshan.server.model.LwM2mModelProvider;
-import org.eclipse.leshan.server.model.StaticModelProvider;
-import org.eclipse.leshan.server.registration.RegistrationUpdate;
-import org.eclipse.leshan.core.observation.Observation;
 import org.eclipse.leshan.server.californium.LeshanServer;
 import org.eclipse.leshan.server.californium.LeshanServerBuilder;
+import org.eclipse.leshan.server.model.LwM2mModelProvider;
+import org.eclipse.leshan.server.model.StaticModelProvider;
 import org.eclipse.leshan.server.registration.Registration;
 import org.eclipse.leshan.server.registration.RegistrationListener;
+import org.eclipse.leshan.server.registration.RegistrationUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +27,7 @@ import java.util.*;
 
 
 public class Server {
-    public static final Logger LOG = LoggerFactory.getLogger("---");
+    public static final Logger LOG = LoggerFactory.getLogger("server----");
     public static void main(String[] args) {
 
         System.out.println("test 2");
@@ -65,18 +67,52 @@ public class Server {
 
 //Debugging stuff
         int clientId;
-        char action;
         int objectId;
         int objectInstanceId;
         int resource;
+        char action;
         String value = "";
+        String memory = "";
 
         while (true) {
+            System.out.print(memory);
             Scanner sc = new Scanner(System.in);
             String input = sc.nextLine();
             String[] request = input.split("/");
 
-            if (input.isEmpty()) continue;
+            if (input.isEmpty()){
+                continue;
+            }
+            if (input.equals("stop")){
+                server.stop();
+                continue;
+            }
+            if (input.equals("start")) {
+                server.start();
+                continue;
+            }
+            if (Objects.equals(request[0], "m+")) {
+                input = input.replaceFirst("m\\+/", "");
+                memory += input;
+                if (memory.charAt(memory.length()-1) != '/')
+                    memory += '/';
+                continue;
+            } else if (Objects.equals(request[0], "m-")) {
+                String[] memSplit = memory.split("/");
+                memory = "";
+                for (int i = 0; i < memSplit.length - 1; i++) {
+                    memory += memSplit[i] +'/';
+                }
+                continue;
+            } else if (Objects.equals(request[0], "mc")) {
+                memory = "";
+                System.out.println("memory cleared");
+                continue;
+            }
+
+            input = memory + input;
+            request = input.split("/");
+
             if (request[0].charAt(0) == '?'){
                 showFullHint();
                 continue;
@@ -86,10 +122,10 @@ public class Server {
             } else {
                 try {
                     clientId = Integer.parseInt(request[0]);
-                    action = request[1].charAt(0);
-                    objectId = Integer.parseInt(request[2]);
-                    objectInstanceId = Integer.parseInt(request[3]);
-                    resource = Integer.parseInt(request[4]);
+                    objectId = Integer.parseInt(request[1]);
+                    objectInstanceId = Integer.parseInt(request[2]);
+                    resource = Integer.parseInt(request[3]);
+                    action = request[4].charAt(0);
                 }catch (Exception ignored){
                     showHint();
                     continue;
@@ -118,16 +154,19 @@ public class Server {
                             LOG.error("Failed to read:" + response.getCode() + " " + response.getErrorMessage());
                     }
                     case 'w' -> {
-                        WriteResponse response = server.send(regList.get(clientId), new WriteRequest(
+                        WriteResponse response = anyDataTypeWriteRequest(
+                                server,
+                                regList,
+                                clientId,
                                 objectId,
                                 objectInstanceId,
                                 resource,
                                 value
-                        ));
+                        );
                         if (response.isSuccess())
                             LOG.info("value changed");
                         else
-                           LOG.error("Failed to write:" + response.getCode() + " " + response.getErrorMessage());
+                            LOG.error("Failed to write:" + response.getCode() + " " + response.getErrorMessage());
                     }
                     case 'e' -> {
                         ExecuteResponse response = server.send(regList.get(clientId), new ExecuteRequest(
@@ -142,17 +181,47 @@ public class Server {
                     }
                     default -> showHint();
                 }
+                Thread.sleep(500);
             }catch (Exception ignored) {}
         }
     }
+
+    private static WriteResponse anyDataTypeWriteRequest(LeshanServer server, ArrayList<Registration> regList, int clientId,
+                                                         int objectID, int objectInstanceID, int resource, String value) throws InterruptedException {
+        String refinedValue = value.replaceFirst(String.valueOf(value.charAt(0)), "");
+        WriteRequest request;
+        switch (value.charAt(0)){
+            case 's' -> request = new WriteRequest(
+                    objectID,
+                    objectInstanceID,
+                    resource,
+                    refinedValue
+            );
+            case 'b' -> request = new WriteRequest(
+                    objectID,
+                    objectInstanceID,
+                    resource,
+                    Boolean.parseBoolean(refinedValue)
+            );
+            case 'i' -> request = new WriteRequest(
+                    objectID,
+                    objectInstanceID,
+                    resource,
+                    Integer.parseInt(refinedValue)
+            );
+            default -> request = null;
+        }
+        return server.send(regList.get(clientId), request);
+    }
+
     private static void showHint(){
-        System.out.println("format: id/r/objectId/objectInstanceId/resource\ntype '?' for more info");
+        System.out.println("format: id/objectId/objectInstanceId/resource/action/(value)\ntype '?' for more info");
     }
 
     private static void showFullHint(){
         System.out.println("""
                         ---------------------
-                        format: clientPseudoId/action/objectId/objectInstanceId/resource/(value)
+                        format: clientPseudoId/objectId/objectInstanceId/resource/action/(value)
                         available actions:
                         r -> read
                         w -> write

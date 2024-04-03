@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.Scanner;
 
 public class ClientSensor {
-    private static final Logger LOG = LoggerFactory.getLogger("---");
+    private static final Logger LOG = LoggerFactory.getLogger("clientSensor----");
     public static void main(String[] args) {
         String[] finalArgs = new String[]{"clientSensor", "00"};
         System.arraycopy(args, 0, finalArgs, 0, args.length);

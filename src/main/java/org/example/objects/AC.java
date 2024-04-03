@@ -3,7 +3,7 @@ package org.example.objects;
 import org.eclipse.leshan.client.resource.BaseInstanceEnabler;
 import org.eclipse.leshan.client.servers.ServerIdentity;
 import org.eclipse.leshan.core.model.ObjectModel;
-import org.eclipse.leshan.core.model.ResourceModel;
+import org.eclipse.leshan.core.model.ResourceModel.Type;
 import org.eclipse.leshan.core.node.LwM2mResource;
 import org.eclipse.leshan.core.response.ReadResponse;
 import org.eclipse.leshan.core.response.WriteResponse;
@@ -55,32 +55,32 @@ public class AC extends BaseInstanceEnabler {
         System.out.println("write request received");
         switch(resourceid) {
             case 5850 ->{
-                if (value.getValue() != ResourceModel.Type.BOOLEAN)
-                    return WriteResponse.badRequest("invalid type");
+                if (value.getType() != Type.BOOLEAN)
+                    return WriteResponse.badRequest("invalid type: "+ value.getType().toString());
                 onOff = (boolean) value.getValue();
                 return WriteResponse.success();
             }
             case 5851 ->{
-                if (value.getValue() != ResourceModel.Type.INTEGER)
-                    return WriteResponse.badRequest("invalid type");
-                Integer intValue = (Integer) value.getValue();
+                if (value.getType() != Type.INTEGER)
+                    return WriteResponse.badRequest("invalid type: "+ value.getType().toString());
+                int intValue = ((Long) value.getValue()).intValue();
                 if (intValue < 0 || intValue > 100)
                     return WriteResponse.badRequest("value out of range");
                 powerLevel = intValue;
                 return WriteResponse.success();
             }
             case 5852 -> {
-                if (value.getValue() != ResourceModel.Type.INTEGER)
-                    return WriteResponse.badRequest("invalid type");
-                Integer intValue = (Integer) value.getValue();
+                if (value.getType() != Type.INTEGER)
+                    return WriteResponse.badRequest("invalid type: "+ value.getType().toString());
+                int intValue = ((Long) value.getValue()).intValue();
                 if (intValue != 0)
                     return WriteResponse.badRequest("invalid value");
                 onTime = 0;
                 return WriteResponse.success();
             }
             case 5750 -> {
-                if (value.getType() != ResourceModel.Type.STRING)
-                    return WriteResponse.badRequest("invalid type");
+                if (value.getType() != Type.STRING)
+                    return WriteResponse.badRequest("invalid type: "+ value.getType().toString());
                 String strValue = (String) value.getValue();
                 if (!modes.contains(strValue))
                     return WriteResponse.badRequest("invalid value");

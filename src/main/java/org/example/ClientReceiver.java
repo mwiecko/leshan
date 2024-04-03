@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.Scanner;
 
 public class ClientReceiver {
-    private static final Logger LOG = LoggerFactory.getLogger("---");
+    private static final Logger LOG = LoggerFactory.getLogger("clientReceiver----");
     public static void main(String[] args) {
         String[] finalArgs = new String[]{"clientReceiver", "01"};
         System.arraycopy(args, 0, finalArgs, 0, args.length);
